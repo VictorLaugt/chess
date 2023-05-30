@@ -4,8 +4,7 @@ Created on Sun Oct  2 17:49:42 2022
 
 @author: Victor Laügt
 
-Interface graphique minimaliste, spécialement conçue pour tester et debuguer
-le module chess
+Interface graphique minimaliste, spécialement conçue pour debuguer.
 """
 __all__ = ['start_debug_ui']
 

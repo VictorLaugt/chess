@@ -3,6 +3,10 @@
 Created on Fri Oct  7 18:09:37 2022
 
 @author: Victor Laügt
+
+Implémente des fonctions permettant de
+- créer la fenstring décrivant l'état courant d'un échiquier
+- restaurer un état de l'échiquier à partir d'une fenstring
 """
 
 import chess

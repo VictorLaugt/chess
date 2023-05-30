@@ -8,8 +8,8 @@ Created on Sat Nov  5 11:53:54 2022
 __all__ = ['explore', 'explore_step_by_step']
 
 
-from .. import chess
-from .. import fenstrings
+import chess
+import fenstrings
 
 from time import perf_counter
 

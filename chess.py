@@ -3,6 +3,9 @@
 Created on Wed Sep  7 17:25:36 2022
 
 @author: Victor Laügt
+
+Implémente l'échiquier, ses pièces et les actions pouvant être effectuées
+dessus.
 """
 
 import abc
