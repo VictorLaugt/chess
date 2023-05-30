@@ -88,8 +88,8 @@ class Action(abc.ABC):
     @abc.abstractmethod
     def is_legal(self) -> bool:
         """Renvoie True ssi l'action vérifie toutes les règles du jeu c.a.d:
-         - vérifie qu'elle ne met ni ne laisse pas le roi de self.piece en échec
-         - vérifie qu'elle est conforme aux règles de déplacement de self.piece
+         - elle ne met ni ne laisse pas le roi de self.piece en échec
+         - elle est conforme aux règles de déplacement de self.piece
         """
 
     # ---- - executeurs d'action
@@ -148,7 +148,7 @@ class Action(abc.ABC):
         board.history.pop()
 
 
-class Movement(Action): # TODO: .is_legal()
+class Movement(Action): # TODO: Movement.is_legal()
     """Déplacement classique d'une pièce quelconque d'une case vers une autre,
     pouvant éventuellement capturer une pièce adverse
     """
@@ -303,7 +303,7 @@ class Promotion(Movement):
         self.piece.alive = True
 
 
-class LongPush(Action):
+class LongPush(Action): # TODO: LongPush.is_legal()
     """Déplacement d'un pion de deux cases en ligne droite vers le côté
     adverse
     """
@@ -340,7 +340,7 @@ class LongPush(Action):
         self.board.en_passant = self.en_passant_save
 
 
-class EnPassant(Action):
+class EnPassant(Action): # TODO: EnPassant.is_legal()
     """Prise en passant d'un pion"""
     __slots__ = ('start', 'end', 'taken',)
 
@@ -388,7 +388,7 @@ class EnPassant(Action):
         board.en_passant = taken_pawn.square - taken_pawn.push_vector
 
 
-class Castle(Action):
+class Castle(Action): # TODO: Castle.is_legal()
     """Roque d'un roi"""
     __slots__ = ('rook', 'king_vector', 'rook_vector', 'rook_castling_save',
                  'en_passant_save')
