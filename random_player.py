@@ -106,7 +106,7 @@ if __name__ == '__main__':
         input()
         return print_state(*args, **kwargs)
 
-    display_random_game(game, -1, rng_seed=10, print_function=step_by_step)
+    display_random_game(game, 300, rng_seed=10, print_function=step_by_step)
 
 
 
