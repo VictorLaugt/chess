@@ -38,6 +38,11 @@ E = +1  # vecteur unitaire pointant vers l'est
 
 
 
+# def is_valid_square(square) -> bool:
+#     line, column = divmod(square, 10)
+#     return 0 <= line <= 7 and 0 <= column <= 7
+
+
 # ---- Actions des pièces
 def castle(board, king, rook, king_vector, rook_vector):
     board[king.square] = EMPTY
@@ -72,7 +77,7 @@ class Action(abc.ABC):
         interface graphique
         """
 
-    # ---- - vérificateurs d'actions
+    # ---- - vérificateur d'actions
     # GUI: pour transmettre uniquement des actions légales à la gui
     def is_check_safe(self) -> bool:
         """Renvoie True ssi l'action ne met ni ne laisse le roi de self.piece
@@ -82,15 +87,6 @@ class Action(abc.ABC):
         self._clean()
         return check_safety
 
-    # SERVER: lorsqu'une action est reçue par le serveur, elle viole
-    # potentiellement les règles de déplacement des pièces, le serveur vérifie
-    # donc qu'elle est légale avec la méthode is_legal()
-    @abc.abstractmethod
-    def is_legal(self) -> bool:
-        """Renvoie True ssi l'action vérifie toutes les règles du jeu c.a.d:
-         - elle ne met ni ne laisse pas le roi de self.piece en échec
-         - elle est conforme aux règles de déplacement de self.piece
-        """
 
     # ---- - executeurs d'action
     # ENGINE: lorsqu'il essaie une action, le moteur d'échecs continue de
@@ -148,7 +144,7 @@ class Action(abc.ABC):
         board.history.pop()
 
 
-class Movement(Action): # TODO: Movement.is_legal()
+class Movement(Action):
     """Déplacement classique d'une pièce quelconque d'une case vers une autre,
     pouvant éventuellement capturer une pièce adverse
     """
@@ -162,9 +158,6 @@ class Movement(Action): # TODO: Movement.is_legal()
 
     def target_square(self):
         return self.end
-
-    def is_legal(self):
-        ...
 
     def _execute(self):
         board, piece, end = self.board, self.piece, self.end
@@ -303,7 +296,7 @@ class Promotion(Movement):
         self.piece.alive = True
 
 
-class LongPush(Action): # TODO: LongPush.is_legal()
+class LongPush(Action):
     """Déplacement d'un pion de deux cases en ligne droite vers le côté
     adverse
     """
@@ -316,9 +309,6 @@ class LongPush(Action): # TODO: LongPush.is_legal()
     def target_square(self):
         pawn = self.piece
         return pawn.square + pawn.longpush_vector
-
-    def is_legal(self):
-        ...
 
     def _execute(self):
         board, pawn = self.board, self.piece
@@ -340,7 +330,7 @@ class LongPush(Action): # TODO: LongPush.is_legal()
         self.board.en_passant = self.en_passant_save
 
 
-class EnPassant(Action): # TODO: EnPassant.is_legal()
+class EnPassant(Action):
     """Prise en passant d'un pion"""
     __slots__ = ('start', 'end', 'taken',)
 
@@ -352,9 +342,6 @@ class EnPassant(Action): # TODO: EnPassant.is_legal()
 
     def target_square(self):
         return self.end
-
-    def is_legal(self):
-        ...
 
     def _execute(self):
         board, pawn, end = self.board, self.piece, self.end
@@ -388,7 +375,7 @@ class EnPassant(Action): # TODO: EnPassant.is_legal()
         board.en_passant = taken_pawn.square - taken_pawn.push_vector
 
 
-class Castle(Action): # TODO: Castle.is_legal()
+class Castle(Action):
     """Roque d'un roi"""
     __slots__ = ('rook', 'king_vector', 'rook_vector', 'rook_castling_save',
                  'en_passant_save')
@@ -405,9 +392,6 @@ class Castle(Action): # TODO: Castle.is_legal()
 
     def is_check_safe(self):
         return True
-
-    def is_legal(self):
-        ...
 
     def _execute(self):
         castle(self.board, self.piece, self.rook, self.king_vector, self.rook_vector)
@@ -575,13 +559,14 @@ class Piece(ChessboardItem):
         return (Movement(board, self, start, end)
                 for end in self._ending_squares(board))
 
-    # GUI: permet de transmettre à la gui toutes les actions légales de la
-    # pièce
-    def check_safe_actions(self, board) -> List[Action]:
-        """Renvoie la liste de toutes les actions de la pièce self qui ne
-        mettent ou ne laissent pas son roi en échec sur l'échiquier board
+    # GUI/SERVER: permet d'obtenir toutes les actions faisables par une pièce, dans un
+    # format approprié pour la gui ou le serveur
+    def choices(self, board) -> Dict[int, Action]:
+        """self.choices(board)[end] == action qui, dans une interface graphique, s'effectue
+        en déplaçant la pièce self vers la case end
         """
-        return [act for act in self.actions(board) if act.is_check_safe()]
+        return {act.target_square(): act
+                for act in self.actions(board) if act.is_check_safe()}
 
 
 class CastlingPiece:
@@ -1071,9 +1056,7 @@ class Chessgame:
         moving_piece_choices = {}
         for piece in self.pieces[self.player]:
             if piece.alive:
-                action_choice = {}
-                for action in piece.check_safe_actions(self):
-                    action_choice[action.target_square()] = action
+                action_choice = piece.choices(self)
                 if action_choice:
                     moving_piece_choices[piece.square] = action_choice
 

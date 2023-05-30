@@ -76,9 +76,7 @@ def square_indexes(sqr_id:int) -> Tuple[int]:
     """square_indexes(sqr_id) == couple d'indices (ligne i, colonne j) de la
     case dont l'identifiant est sqr_id dans le noyau
     """
-    i = sqr_id//10
-    j = sqr_id%10
-    return (i, j)
+    return divmod(sqr_id, 10)
 
 def square_name(sqr_id:int) -> str:
     """square_name(sqr_id) == nom de la case dont l'identifiant est sqr_id dans
