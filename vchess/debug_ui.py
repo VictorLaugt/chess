@@ -9,8 +9,10 @@ Interface graphique minimaliste, spécialement conçue pour debuguer.
 __all__ = ['start_debug_ui']
 
 
-import chess
-import fenstrings
+from vchess import chess
+from vchess import fenstrings
+# import chess
+# import fenstrings
 
 import threading
 import tkinter as tk

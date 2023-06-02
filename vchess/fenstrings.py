@@ -9,7 +9,8 @@ Implémente des fonctions permettant de
 - restaurer un état de l'échiquier à partir d'une fenstring
 """
 
-import chess
+from vchess import chess
+
 from typing import Dict
 
 __all__ = ['load', 'loaded', 'create']
