@@ -10,13 +10,31 @@ import os
 import random
 from typing import Tuple
 
-import chess
-import fenstrings
+from vchess import chess
+from vchess import fenstrings
 
-from debug_ui import start_debug_ui
+from vchess.debug_ui import start_debug_ui
 
 
-SEP =  '-'*50
+class PrintFunctions:
+    SEP =  '-'*50
+
+    @staticmethod
+    def do_not_print(action:chess.Action, game:chess.Chessgame):
+        pass
+
+    @classmethod
+    def print_state(cls, action:chess.Action, game:chess.Chessgame):
+        """Affiche l'état actuel de l'échiquier."""
+        print(cls.SEP)
+        print(action, end='\n\n')
+        print(game, end='\n\n\n')
+
+    @classmethod
+    def step_by_step(cls, action:chess.Action, game:chess.Chessgame):
+        input()
+        return cls.print_state(action, game)
+
 
 
 def square_indexes(sqr_id:int) -> Tuple[int]:
@@ -48,17 +66,6 @@ def action_repr(action:chess.Action) -> str:
         )
 
 
-def print_state(action:chess.Action, game:chess.Chessgame):
-    """Affiche l'état actuel de l'échiquier."""
-    print(SEP)
-    print(action, end='\n\n')
-    print(game, end='\n\n\n')
-
-
-def do_not_print(action:chess.Action, game:chess.Chessgame):
-    pass
-
-
 def play_randomly(game:chess.Chessgame, print_func) -> bool:
     """Si cela est possible, joue une action aléatoire sur l'échiquier `game`
     et renvoie True, sinon, renvoie False.
@@ -72,7 +79,7 @@ def play_randomly(game:chess.Chessgame, print_func) -> bool:
     return False
 
 
-def random_player(game:chess.Chessgame, n:int, print_function=do_not_print):
+def random_player(game:chess.Chessgame, n:int, print_function=PrintFunctions.do_not_print):
     """
     Joue aléatoirement pendant au plus `n` actions sur l'échiquier `game` et
     revoie la fenstring décrivant l'état final de l'échiquier
@@ -84,7 +91,7 @@ def random_player(game:chess.Chessgame, n:int, print_function=do_not_print):
 
 
 
-def display_random_game(game, n, /, *, rng_seed=None, print_function=do_not_print, dbg:bool=False):
+def display_random_game(game, n, /, *, rng_seed=None, print_function=PrintFunctions.do_not_print, dbg:bool=False):
     rng_seed = rng_seed or os.urandom(20)
     random.seed(rng_seed)
     print(f"Rng seed used: {rng_seed}")
@@ -100,13 +107,9 @@ def display_random_game(game, n, /, *, rng_seed=None, print_function=do_not_prin
         start_debug_ui(game)
 
 
+
 if __name__ == '__main__':
     game = chess.Chessgame()
-    def step_by_step(*args, **kwargs):
-        input()
-        return print_state(*args, **kwargs)
-
-    display_random_game(game, 300, rng_seed=10, print_function=step_by_step)
-
+    display_random_game(game, 300, rng_seed=10, print_function=PrintFunctions.do_not_print)
 
 

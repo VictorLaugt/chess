@@ -12,8 +12,8 @@ Construction des arbres par induction :
     K = {(valeur, noeuds) ---> Node(valeur, noeuds)}
 """
 
-import chess
-import fenstrings
+from vchess import chess
+from vchess import fenstrings
 
 import actions_gen
 
