@@ -11,18 +11,15 @@ __all__ = ['start_debug_ui']
 
 from vchess import chess
 from vchess import fenstrings
-# import chess
-# import fenstrings
 
-import threading
+from pathlib import Path
+
 import tkinter as tk
 from PIL import Image, ImageTk
 
 from enum import IntEnum
 from typing import Union, Tuple, List, Dict, Iterable
 
-# from MyTools import debug
-# dbg = debug.DebugSpace(name='debug_ui', trackers=True, print_msg=True, msg_history=True)
 
 ActionsDictionary = Dict[int, chess.Action]
 ChoicesDictionary = Dict[int, ActionsDictionary]
@@ -52,14 +49,14 @@ BSQR_COLOR = "#8B8B73"
 
 
 # noms des fichiers images des pièces
-IMAGE_PATH = "./_images"
+IMAGE_PATH = Path(__file__).resolve().parent.joinpath("_images")
 IMAGE_NAMES = {
-    chess.Pawn: "/pion.png",
-    chess.Bishop: "/fou.png",
-    chess.Knight: "/cavalier.png",
-    chess.Rook: "/tour.png",
-    chess.Queen: "/dame.png",
-    chess.King: "/roi.png",
+    chess.Pawn: "pion.png",
+    chess.Bishop: "fou.png",
+    chess.Knight: "cavalier.png",
+    chess.Rook: "tour.png",
+    chess.Queen: "dame.png",
+    chess.King: "roi.png",
     }
 
 
@@ -160,7 +157,7 @@ class CoreInterface:
         """Renvoie True ssi une case a été selectionnée par l'utilisateur"""
         return self.selected_square is not None
 
-    def marked_squares(self) -> (Iterable[int], MarkType):
+    def marked_squares(self) -> Tuple[Iterable[int], MarkType]:
         """Renvoie le liste des cases à surligner et la couleur dans laquelle
         il faut les surligner
         """
@@ -239,7 +236,7 @@ def action_repr(action:chess.Action) -> str:
         )
 
 
-def choices_repr_lines(coreinterface:CoreInterface) -> (List[str], List[int]):
+def choices_repr_lines(coreinterface:CoreInterface) -> Tuple[List[str], List[int]]:
     actions_list = [
         act for actions in coreinterface.choices.values()
         for act in actions.values()
@@ -260,7 +257,8 @@ def choices_repr_lines(coreinterface:CoreInterface) -> (List[str], List[int]):
 
 # ---- sprites
 class Sprite(ImageTk.PhotoImage):
-    def __init__(self, path:str, width:int):
+    def __init__(self, path:Path, width:int):
+        assert path.is_file(), f"Image not found: {path}"
         img = Image.open(path)
         l_img = img.size[0]
         if l_img != width:
@@ -272,12 +270,12 @@ def piece_sprite(piece_type:type, colour:bool, width:int) -> Sprite:
     """Crée et renvoie un Sprite de largeur width représentant une pièce de
     type piece_type et de la couleur colour
     """
-    pieces_dir = "/_effective_pieces"
+    pieces_dir = "_effective_pieces"
     if colour:
-        colour_dir = "/_white"
+        colour_dir = "_white"
     else:
-        colour_dir = "/_black"
-    path = IMAGE_PATH + pieces_dir + colour_dir + IMAGE_NAMES[piece_type]
+        colour_dir = "_black"
+    path = IMAGE_PATH.joinpath(pieces_dir).joinpath(colour_dir).joinpath(IMAGE_NAMES[piece_type])
     return Sprite(path, width)
 
 
@@ -358,15 +356,15 @@ class BoardViewer(tk.Canvas):
         sprite_size = self.sqr_size
         self.mark_sprite = (
             Sprite(
-                IMAGE_PATH + "/green_highlight.png",
+                IMAGE_PATH.joinpath("green_highlight.png"),
                 sprite_size
                 ),
             Sprite(
-                IMAGE_PATH + "/yellow_highlight.png",
+                IMAGE_PATH.joinpath("yellow_highlight.png"),
                 sprite_size
                 ),
             Sprite(
-                IMAGE_PATH + "/red_highlight.png",
+                IMAGE_PATH.joinpath("red_highlight.png"),
                 sprite_size
                 )
             )
@@ -676,28 +674,24 @@ def start_debug_ui(*args):
     game_viewer.mainloop()
 
 
-class BugTrackerFenstrings:
+
+
+if __name__ == '__main__':
+    # fenstrings pour trouver des bugs dans le module chess
     position1 = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
     position2 = "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq -"
     position3 = "8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8 w - -"
     position4 = "r3k2r/Pppp1ppp/1b3nbN/nP6/BBP1P3/q4N2/Pp1P2PP/R2Q1RK1 w kq - 0 1"
     position5 = "rnbq1k1r/pp1Pbppp/2p5/8/2B5/8/PPP1NnPP/RNBQK2R w KQ - 1 8"
 
-
-if __name__ == '__main__':
-    default_start_fenstring = None
+    # fenstring pour tester certains cas limites du module chess
     promotion_test_fenstring = "rnbqkb1r/pppppp1p/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
     no_pawn_fenstring = "rnbqkbnr/8/8/8/8/8/8/RNBQKBNR b KQkq - 0 1"
     castle_free_fenstring = "r3k2r/8/8/pppppppp/PPPPPPPP/8/8/R3K2R w KQkq - 0 1"
     bug_tracker_fenstring = "rnbq1k1r/pp1Pbppp/2p5/8/2B5/8/PPP1NnPP/RNBQK2R w KQ - 1 8"
 
-    RUN_IN_BACKGROUND = False
     CORE = chess.Chessgame()
-    FENSTRING = BugTrackerFenstrings.position4
+    FENSTRING = position4
     # FENSTRING = "3r2n1/1bN4r/R1pbBp1p/1p2p1p1/1Pk1P1P1/2P5/1Q2K2P/1NBR4 b - - 0 1"
 
-    if RUN_IN_BACKGROUND:
-        thread = threading.Thread(target=start_debug_ui, args=(FENSTRING,))
-        thread.start()
-    else:
-        start_debug_ui(FENSTRING)
+    start_debug_ui(FENSTRING)
